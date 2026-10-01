@@ -1,0 +1,115 @@
+from typing import Dict, Any
+
+
+class ResponseEngine:
+        def respond(
+        self,
+        prediction,
+        threat_score,
+        traffic
+    ):
+        """
+        Simulated defensive response.
+
+        This does not modify the real network.
+        It only records the defensive decision.
+        """
+
+        prediction = str(prediction).upper()
+        threat_score = float(threat_score)
+
+        if prediction in ["NORMAL", "BENIGN"]:
+            action = "MONITOR"
+
+        elif threat_score >= 0.80:
+            action = "BLOCK"
+
+        elif threat_score >= 0.50:
+            action = "QUARANTINE"
+
+        else:
+            action = "RATE_LIMIT"
+
+        result = {
+            "action": action,
+            "status": "SIMULATED",
+            "prediction": prediction,
+            "threat_score": threat_score,
+            "message": (
+                f"Simulated defense action: {action}"
+            )
+        }
+
+        print(
+            f"[DEFENSE] {action} "
+            f"| threat_score={threat_score}"
+        )
+
+        return result
+    """
+    Defensive response engine.
+
+    Actions are simulated and recorded.
+    No real firewall or network device is modified.
+    """
+
+    def determine_action(
+        self,
+        severity: str,
+        risk_score: int
+    ) -> Dict[str, Any]:
+
+        severity = severity.upper()
+
+        if severity == "CRITICAL":
+
+            action = "ISOLATE_SOURCE"
+
+            description = (
+                "Simulated isolation of the "
+                "suspected malicious source."
+            )
+
+            priority = "IMMEDIATE"
+
+        elif severity == "HIGH":
+
+            action = "BLOCK_SOURCE"
+
+            description = (
+                "Simulated blocking of the "
+                "suspected malicious source."
+            )
+
+            priority = "HIGH"
+
+        elif severity == "MEDIUM":
+
+            action = "MONITOR_AND_ALERT"
+
+            description = (
+                "Continue monitoring the source "
+                "and generate a security alert."
+            )
+
+            priority = "MEDIUM"
+
+        else:
+
+            action = "ALLOW"
+
+            description = (
+                "Traffic allowed. No defensive "
+                "action required."
+            )
+
+            priority = "LOW"
+
+        return {
+            "action": action,
+            "priority": priority,
+            "risk_score": risk_score,
+            "severity": severity,
+            "description": description,
+            "simulated": True
+        }

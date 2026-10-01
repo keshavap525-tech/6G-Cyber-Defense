@@ -1,0 +1,197 @@
+from backend.services.response_engine import ResponseEngine
+import uuid
+import json
+
+from backend.ml.predict import IntrusionDetector
+from backend.services.threat_engine import ThreatEngine
+from backend.database.database import SessionLocal
+from backend.database.models import SecurityIncident
+
+
+class DetectionService:
+
+    def __init__(self):
+
+        self.detector = IntrusionDetector()
+
+        self.threat_engine = ThreatEngine()
+
+        self.response_engine = ResponseEngine()
+
+
+    def analyze(
+        self,
+        traffic: dict
+    ):
+
+        # -----------------------------------------
+        # 1. ML detection
+        # -----------------------------------------
+
+        prediction_result = self.detector.predict(
+            traffic
+        )
+
+        prediction = prediction_result[
+            "prediction"
+        ]
+
+        confidence = prediction_result.get(
+            "confidence",
+            0.0
+        )
+
+        # -----------------------------------------
+        # 2. Threat analysis
+        # -----------------------------------------
+
+        # -----------------------------------------
+        # 2. Threat analysis
+        # -----------------------------------------
+
+        threat_result = (
+            self.threat_engine.calculate_risk(
+                prediction=prediction,
+                confidence=confidence,
+                traffic=traffic
+            )
+        )
+
+        risk_score = (
+            threat_result[
+                "risk_score"
+            ]
+        )
+
+        severity = (
+            threat_result[
+                "severity"
+            ]
+        )
+
+        recommended_action = (
+            threat_result[
+                "recommended_action"
+            ]
+        )
+        response_result = (
+    self.response_engine.determine_action(
+        severity=severity,
+        risk_score=risk_score
+    )
+)
+
+        # -----------------------------------------
+        # 3. Store security incident
+        # -----------------------------------------
+
+        incident_id = None
+
+        # Only store actual detected attacks.
+        if prediction != "NORMAL":
+
+            db = SessionLocal()
+
+            try:
+
+                incident_id = (
+                    "INC-"
+                    + uuid.uuid4()
+                    .hex[:12]
+                    .upper()
+                )
+
+                incident = SecurityIncident(
+
+                    incident_id=incident_id,
+
+                    source_ip=traffic.get(
+                        "source_ip"
+                    ),
+
+                    destination_ip=traffic.get(
+                        "destination_ip"
+                    ),
+
+                    source_port=traffic.get(
+                        "source_port"
+                    ),
+
+                    destination_port=
+                        traffic.get(
+                            "destination_port"
+                        ),
+
+                    protocol=traffic.get(
+                        "protocol"
+                    ),
+
+                    attack_type=prediction,
+
+                    confidence=confidence,
+
+                    risk_score=risk_score,
+
+                    severity=severity,
+
+                    recommended_action=
+                        recommended_action,
+
+                    status="OPEN",
+
+                    response_action=None,
+
+                    details=json.dumps(
+                        traffic
+                    )
+                )
+
+                db.add(incident)
+
+                db.commit()
+
+            except Exception:
+
+                db.rollback()
+
+                raise
+
+            finally:
+
+                db.close()
+
+        # -----------------------------------------
+        # 4. Return complete analysis
+        # -----------------------------------------
+
+        return {
+
+    "traffic": traffic,
+
+    "detection": {
+
+        "prediction":
+            prediction,
+
+        "is_attack":
+            prediction != "NORMAL",
+
+        "confidence":
+            confidence
+    },
+
+    "threat":
+        threat_result,
+
+    "response":
+        response_result,
+
+    "incident": {
+
+        "created":
+            incident_id is not None,
+
+        "incident_id":
+            incident_id
+    }
+}

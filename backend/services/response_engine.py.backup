@@ -1,0 +1,71 @@
+from typing import Dict, Any
+
+
+class ResponseEngine:
+    """
+    Defensive response engine.
+
+    Actions are simulated and recorded.
+    No real firewall or network device is modified.
+    """
+
+    def determine_action(
+        self,
+        severity: str,
+        risk_score: int
+    ) -> Dict[str, Any]:
+
+        severity = severity.upper()
+
+        if severity == "CRITICAL":
+
+            action = "ISOLATE_SOURCE"
+
+            description = (
+                "Simulated isolation of the "
+                "suspected malicious source."
+            )
+
+            priority = "IMMEDIATE"
+
+        elif severity == "HIGH":
+
+            action = "BLOCK_SOURCE"
+
+            description = (
+                "Simulated blocking of the "
+                "suspected malicious source."
+            )
+
+            priority = "HIGH"
+
+        elif severity == "MEDIUM":
+
+            action = "MONITOR_AND_ALERT"
+
+            description = (
+                "Continue monitoring the source "
+                "and generate a security alert."
+            )
+
+            priority = "MEDIUM"
+
+        else:
+
+            action = "ALLOW"
+
+            description = (
+                "Traffic allowed. No defensive "
+                "action required."
+            )
+
+            priority = "LOW"
+
+        return {
+            "action": action,
+            "priority": priority,
+            "risk_score": risk_score,
+            "severity": severity,
+            "description": description,
+            "simulated": True
+        }

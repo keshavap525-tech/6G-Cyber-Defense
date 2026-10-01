@@ -1,0 +1,5 @@
+model,accuracy,precision,recall,f1_score,training_time_seconds
+Random Forest,1.0,1.0,1.0,1.0,0.15791988372802734
+Extra Trees,1.0,1.0,1.0,1.0,0.09890890121459961
+Gradient Boosting,1.0,1.0,1.0,1.0,5.98283314704895
+Logistic Regression,0.9995,0.9995058823529411,0.9995,0.9995000826418962,0.024771690368652344

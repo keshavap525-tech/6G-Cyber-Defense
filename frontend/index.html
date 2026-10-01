@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>6G Cyber Defense Center</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div>
+
+            <h1>
+                6G CYBER DEFENSE CENTER
+            </h1>
+
+            <p>
+                AI-Powered Network Security Monitoring System
+            </p>
+
+        </div>
+
+        <div
+            id="systemStatus"
+            class="status offline"
+        >
+            OFFLINE
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+    ====================================================== -->
+
+    <main class="container">
+
+
+        <!-- =================================================
+             STAT CARDS
+        ================================================== -->
+
+        <section class="stats">
+
+            <div class="card">
+
+                <h3>
+                    TOTAL PACKETS
+                </h3>
+
+                <div
+                    id="totalPackets"
+                    class="number"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    THREATS DETECTED
+                </h3>
+
+                <div
+                    id="totalThreats"
+                    class="number danger"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    SECURITY INCIDENTS
+                </h3>
+
+                <div
+                    id="totalIncidents"
+                    class="number warning"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    CURRENT ATTACK
+                </h3>
+
+                <div
+                    id="currentAttack"
+                    class="attack"
+                >
+                    NONE
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONTROL PANEL
+        ================================================== -->
+
+        <section class="panel">
+
+            <h2>
+                6G SIMULATOR CONTROL
+            </h2>
+
+            <div class="controls">
+
+                <button
+                    id="startBtn"
+                    onclick="startSimulator()"
+                >
+                    START SIMULATOR
+                </button>
+
+                <button
+                    id="stopBtn"
+                    onclick="stopSimulator()"
+                    class="stop"
+                >
+                    STOP SIMULATOR
+                </button>
+
+            </div>
+
+
+            <div class="attack-controls">
+
+                <button
+                    onclick="launchAttack('NONE')"
+                >
+                    NORMAL
+                </button>
+
+                <button
+                    onclick="launchAttack('DDOS')"
+                >
+                    DDOS
+                </button>
+
+                <button
+                    onclick="launchAttack('PORT_SCAN')"
+                >
+                    PORT SCAN
+                </button>
+
+                <button
+                    onclick="launchAttack('BOTNET')"
+                >
+                    BOTNET
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             THREAT MONITOR
+        ================================================== -->
+
+        <section class="grid">
+
+
+            <div class="panel">
+
+                <h2>
+                    THREAT MONITOR
+                </h2>
+
+                <div class="threat-box">
+
+                    <div>
+
+                        <span>
+                            Threat Level
+                        </span>
+
+                        <strong
+                            id="threatLevel"
+                        >
+                            LOW
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Threat Score
+                        </span>
+
+                        <strong
+                            id="threatScore"
+                        >
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>
+                    LAST NETWORK EVENT
+                </h2>
+
+                <div
+                    id="lastEvent"
+                    class="event"
+                >
+                    No network event yet.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LAST ML ANALYSIS
+        ================================================== -->
+
+        <section class="panel">
+
+            <h2>
+                AI / ML ANALYSIS
+            </h2>
+
+            <pre
+                id="lastAnalysis"
+            >No analysis available.</pre>
+
+        </section>
+
+
+        <!-- =================================================
+             INCIDENTS
+        ================================================== -->
+
+        <section class="panel">
+
+            <h2>
+                SECURITY INCIDENTS
+            </h2>
+
+            <div
+                id="incidents"
+                class="incidents"
+            >
+                Loading incidents...
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer>
+
+        <p>
+            6G Cyber Defense System |
+            Final Year Project
+        </p>
+
+    </footer>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

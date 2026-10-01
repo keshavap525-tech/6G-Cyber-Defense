@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>6G AI Cyber Defense Dashboard</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div>
+        <h1>6G AI Cyber Defense</h1>
+        <p>AI-Powered Network Threat Detection & Response</p>
+    </div>
+
+    <div class="status">
+        <span id="systemDot"></span>
+        <span id="systemStatus">SYSTEM ONLINE</span>
+    </div>
+
+</header>
+
+
+<main class="dashboard">
+    <!-- ========================================================= -->
+<!-- SIMULATOR CONTROL PANEL -->
+<!-- ========================================================= -->
+
+<section class="panel control-panel">
+
+    <h2>6G Simulator Control</h2>
+
+    <div class="control-group">
+
+        <h3>Simulator</h3>
+
+        <button
+            id="startSimulator"
+            class="control-button start-button">
+            ▶ START SIMULATOR
+        </button>
+
+        <button
+            id="stopSimulator"
+            class="control-button stop-button">
+            ■ STOP SIMULATOR
+        </button>
+
+    </div>
+
+
+    <div class="control-group">
+
+        <h3>Attack Type</h3>
+
+        <button
+            id="normalAttack"
+            class="control-button">
+            NORMAL
+        </button>
+
+        <button
+            id="ddosAttack"
+            class="control-button attack-button">
+            DDOS
+        </button>
+
+        <button
+            id="portScanAttack"
+            class="control-button attack-button">
+            PORT SCAN
+        </button>
+
+        <button
+            id="botnetAttack"
+            class="control-button attack-button">
+            BOTNET
+        </button>
+
+    </div>
+
+
+    <div class="control-status">
+
+        Current Mode:
+
+        <strong id="controlAttackStatus">
+            NONE
+        </strong>
+
+    </div>
+
+</section>
+
+    <!-- STAT CARDS -->
+
+    <section class="cards">
+
+        <div class="card">
+            <h3>Total Packets</h3>
+            <div id="totalPackets">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Threats Detected</h3>
+            <div id="totalThreats">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Security Incidents</h3>
+            <div id="totalIncidents">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Current Attack</h3>
+            <div id="currentAttack">NONE</div>
+        </div>
+
+    </section>
+
+
+    <!-- CHARTS -->
+
+    <section class="charts">
+
+        <div class="panel">
+
+            <h2>Network Traffic</h2>
+
+            <canvas id="trafficChart"></canvas>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h2>Threat Distribution</h2>
+
+            <canvas id="threatChart"></canvas>
+
+        </div>
+
+    </section>
+
+
+    <!-- THREAT LEVEL -->
+
+    <section class="panel">
+
+        <h2>Threat Level</h2>
+
+        <div class="threat-container">
+
+            <div class="threat-bar">
+
+                <div
+                    id="threatProgress"
+                    class="threat-progress">
+                </div>
+
+            </div>
+
+            <div id="threatLevel">
+                LOW
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- LIVE EVENTS -->
+
+    <section class="panel">
+
+        <h2>Live Security Events</h2>
+
+        <div id="events">
+
+            <div class="event">
+                System initialized...
+            </div>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>

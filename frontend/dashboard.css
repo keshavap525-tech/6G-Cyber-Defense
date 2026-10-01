@@ -1,0 +1,370 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0b1020;
+    color: white;
+}
+
+.topbar {
+    padding: 20px 30px;
+    background: #111827;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-bottom: 1px solid #263247;
+}
+
+.topbar h1 {
+    font-size: 28px;
+}
+
+.topbar p {
+    color: #9ca3af;
+    margin-top: 5px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-weight: bold;
+}
+
+#systemDot {
+    width: 12px;
+    height: 12px;
+
+    background: #22c55e;
+
+    border-radius: 50%;
+}
+
+.dashboard {
+    padding: 30px;
+}
+
+.cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+}
+
+.card {
+    background: #111827;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    border: 1px solid #263247;
+}
+
+.card h3 {
+    color: #9ca3af;
+
+    font-size: 14px;
+
+    margin-bottom: 15px;
+}
+
+.card div {
+    font-size: 30px;
+
+    font-weight: bold;
+}
+
+.charts {
+    display: grid;
+
+    grid-template-columns:
+        2fr 1fr;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+}
+
+.panel {
+    background: #111827;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    border: 1px solid #263247;
+
+    margin-bottom: 20px;
+}
+
+.panel h2 {
+    margin-bottom: 20px;
+
+    font-size: 20px;
+}
+
+canvas {
+    max-height: 320px;
+}
+
+.threat-container {
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.threat-bar {
+    width: 100%;
+
+    height: 25px;
+
+    background: #263247;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.threat-progress {
+    height: 100%;
+
+    width: 10%;
+
+    background: #22c55e;
+
+    transition:
+        width 0.5s ease;
+}
+
+#threatLevel {
+    min-width: 100px;
+
+    font-weight: bold;
+}
+
+.event {
+    padding: 15px;
+
+    margin-bottom: 10px;
+
+    background: #1f2937;
+
+    border-left: 4px solid #3b82f6;
+
+    border-radius: 5px;
+}
+
+@media (max-width: 900px) {
+
+    .cards {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .charts {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+}
+/* ============================================================
+   SIMULATOR CONTROL PANEL
+   ============================================================ */
+
+.control-panel {
+    margin-bottom: 25px;
+}
+
+.control-group {
+    margin-top: 20px;
+}
+
+.control-group h3 {
+    margin-bottom: 12px;
+}
+
+.control-button {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #24324a;
+    color: white;
+    transition: 0.2s;
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.start-button {
+    background: #16a34a;
+}
+
+.stop-button {
+    background: #dc2626;
+}
+
+.attack-button {
+    background: #b91c1c;
+}
+
+.control-status {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #182337;
+    font-size: 15px;
+}
+
+#controlAttackStatus {
+    margin-left: 8px;
+}
+/* ============================================================
+   6G SIMULATOR CONTROL PANEL
+   ============================================================ */
+
+.control-panel {
+    margin-bottom: 25px;
+}
+
+.control-section {
+    margin-top: 20px;
+}
+
+.control-section h3 {
+    margin-bottom: 12px;
+}
+
+
+/* ============================================================
+   CONTROL BUTTONS
+   ============================================================ */
+
+.control-button {
+    border: none;
+    border-radius: 8px;
+
+    padding: 13px 22px;
+
+    margin: 5px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.control-button:active {
+    transform: translateY(0);
+}
+
+
+/* START */
+
+.start-button {
+    background: #16a34a;
+}
+
+
+/* STOP */
+
+.stop-button {
+    background: #dc2626;
+}
+
+
+/* NORMAL */
+
+.normal-button {
+    background: #2563eb;
+}
+
+
+/* DDOS */
+
+.ddos-button {
+    background: #dc2626;
+}
+
+
+/* PORT SCAN */
+
+.portscan-button {
+    background: #d97706;
+}
+
+
+/* BOTNET */
+
+.botnet-button {
+    background: #7c3aed;
+}
+
+
+/* ============================================================
+   STATUS BOX
+   ============================================================ */
+
+.simulator-status-box {
+
+    display: flex;
+
+    gap: 40px;
+
+    margin-top: 20px;
+
+    padding: 15px 20px;
+
+    background: #182337;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+}
+
+.simulator-status-box strong {
+    margin-left: 8px;
+}

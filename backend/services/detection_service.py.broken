@@ -1,0 +1,207 @@
+from backend.services.response_engine import ResponseEngine
+import uuid
+import json
+
+from backend.ml.predict import IntrusionDetector
+from backend.services.threat_engine import ThreatEngine
+from backend.database.database import SessionLocal
+from backend.database.models import SecurityIncident
+
+
+class DetectionService:
+
+    def __init__(self):
+
+        self.detector = IntrusionDetector()
+
+        self.threat_engine = ThreatEngine()
+
+        self.response_engine = ResponseEngine()
+
+
+    def analyze(self, traffic: dict):
+
+    # -----------------------------------------
+    # 1. ML detection
+    # -----------------------------------------
+
+    prediction_result = self.detector.predict(
+        traffic
+    )
+
+    prediction = prediction_result.get(
+        "prediction",
+        "NORMAL"
+    )
+
+    threat_score = float(
+        prediction_result.get(
+            "threat_score",
+            prediction_result.get(
+                "confidence",
+                0.0
+            )
+        )
+    )
+
+    # -----------------------------------------
+    # 2. Threat analysis
+    # -----------------------------------------
+
+    try:
+        threat_result = self.threat_engine.analyze(
+            prediction=prediction,
+            threat_score=threat_score,
+            traffic=traffic
+        )
+    except TypeError:
+        try:
+            threat_result = self.threat_engine.analyze(
+                prediction,
+                threat_score,
+                traffic
+            )
+        except Exception as e:
+            threat_result = {
+                "error": str(e)
+            }
+    except Exception as e:
+        threat_result = {
+            "error": str(e)
+        }
+
+    # -----------------------------------------
+    # 3. Determine whether this is an attack
+    # -----------------------------------------
+
+    is_attack = (
+        str(prediction).upper()
+        not in ["NORMAL", "BENIGN"]
+    )
+
+    # -----------------------------------------
+    # 4. Save security incident
+    # -----------------------------------------
+
+    incident_id = None
+
+    if is_attack:
+
+        db = SessionLocal()
+
+        try:
+
+            incident = SecurityIncident()
+
+            # Set fields only if they exist
+            columns = SecurityIncident.__table__.columns
+
+            if "attack_type" in columns:
+                incident.attack_type = str(
+                    prediction
+                )
+
+            if "threat_score" in columns:
+                incident.threat_score = threat_score
+
+            if "severity" in columns:
+
+                if threat_score >= 0.8:
+                    incident.severity = "CRITICAL"
+
+                elif threat_score >= 0.5:
+                    incident.severity = "HIGH"
+
+                elif threat_score >= 0.25:
+                    incident.severity = "MEDIUM"
+
+                else:
+                    incident.severity = "LOW"
+
+            if "status" in columns:
+                incident.status = "OPEN"
+
+            if "description" in columns:
+                incident.description = (
+                    f"ML detected {prediction}"
+                )
+
+            db.add(incident)
+
+            db.commit()
+
+            db.refresh(incident)
+
+            incident_id = getattr(
+                incident,
+                "id",
+                None
+            )
+
+        except Exception as e:
+
+            db.rollback()
+
+            print(
+                f"Incident database error: {e}"
+            )
+
+        finally:
+
+            db.close()
+
+    # -----------------------------------------
+    # 5. Automated response
+    # -----------------------------------------
+
+    response_result = None
+
+    if is_attack:
+
+        try:
+
+            response_result = (
+                self.response_engine.respond(
+                    prediction=prediction,
+                    threat_score=threat_score,
+                    traffic=traffic
+                )
+            )
+
+        except TypeError:
+
+            try:
+
+                response_result = (
+                    self.response_engine.respond(
+                        prediction,
+                        threat_score,
+                        traffic
+                    )
+                )
+
+            except Exception as e:
+
+                response_result = {
+                    "error": str(e)
+                }
+
+        except Exception as e:
+
+            response_result = {
+                "error": str(e)
+            }
+
+    # -----------------------------------------
+    # 6. Return complete analysis
+    # -----------------------------------------
+
+    return {
+        "prediction": prediction,
+        "threat_score": threat_score,
+        "is_attack": is_attack,
+        "incident_id": incident_id,
+        "threat_analysis": threat_result,
+        "response": response_result,
+        "traffic": traffic
+    }
