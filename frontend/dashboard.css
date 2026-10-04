@@ -707,3 +707,46 @@ canvas {
     stroke: white;
     stroke-width: 2;
 }
+/* FIX: Threat Score Timeline black background */
+
+#threatTimelineChart {
+    width: 100%;
+    height: 280px;
+    min-height: 280px;
+    margin-top: 10px;
+    background: transparent !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#threatTimelineChart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent !important;
+}
+
+#threatTimelineChart svg rect {
+    fill: transparent !important;
+}
+
+.timeline-grid {
+    stroke: rgba(255, 255, 255, 0.10) !important;
+    stroke-width: 1 !important;
+}
+
+.timeline-line {
+    fill: none !important;
+    stroke: #3b9ff3 !important;
+    stroke-width: 3 !important;
+}
+
+.timeline-area {
+    fill: rgba(59, 159, 243, 0.20) !important;
+}
+
+.timeline-point {
+    fill: #3b9ff3 !important;
+    stroke: #ffffff !important;
+    stroke-width: 2 !important;
+}
