@@ -368,3 +368,342 @@ canvas {
 .simulator-status-box strong {
     margin-left: 8px;
 }
+/* =========================================
+   LIVE SECURITY INCIDENT PANEL
+========================================= */
+
+.incident-panel {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    margin-bottom: 5px;
+}
+
+.panel-header p {
+    margin: 0;
+    opacity: 0.7;
+}
+
+.live-indicator {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: rgba(22, 163, 74, 0.15);
+    color: #22c55e;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.incident-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.incident-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+}
+
+.incident-table th {
+    padding: 13px;
+    text-align: left;
+    background: #182337;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.incident-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+}
+
+.incident-table tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+
+/* =========================================
+   SEVERITY
+========================================= */
+
+.severity-low {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.severity-medium {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.severity-high {
+    color: #f97316;
+    font-weight: bold;
+}
+
+.severity-critical {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   ATTACK BADGES
+========================================= */
+
+.attack-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+
+/* =========================================
+   DEFENSE PANEL
+========================================= */
+
+.defense-panel {
+    margin-bottom: 25px;
+}
+
+.defense-status {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.defense-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.defense-card {
+    background: #182337;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.defense-card span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+.defense-card strong {
+    font-size: 20px;
+}
+
+.defense-message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #182337;
+    font-size: 14px;
+}
+
+@media (max-width: 900px) {
+
+    .defense-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .defense-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+/* =====================================================
+   ADVANCED ANALYTICS
+   ===================================================== */
+
+.analytics-panel {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+
+/* ANALYTICS CARDS */
+
+.analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+
+.analytics-card {
+    background: #182337;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+
+.analytics-card span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 10px;
+}
+
+
+.analytics-card strong {
+    font-size: 28px;
+}
+
+
+/* CHART AREA */
+
+.analytics-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+
+.analytics-chart-box {
+    background: #182337;
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 300px;
+}
+
+
+.analytics-chart-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+
+/* NETWORK METRICS */
+
+.network-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+
+.metric-box {
+    background: #182337;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+
+.metric-box span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+
+.metric-box strong {
+    font-size: 20px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .analytics-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analytics-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .network-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .analytics-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .network-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+.analytics-chart-box {
+    position: relative;
+    height: 350px;
+}
+
+.analytics-chart-box canvas {
+    width: 100% !important;
+    height: 280px !important;
+}
+.analytics-chart-box {
+    position: relative;
+    height: 350px;
+}
+
+.analytics-chart-box canvas {
+    width: 100% !important;
+    height: 280px !important;
+}
+#threatTimelineChart {
+    width: 100%;
+    height: 280px;
+    min-height: 280px;
+    margin-top: 10px;
+}
+
+#threatTimelineChart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.timeline-grid {
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 1;
+}
+
+.timeline-line {
+    fill: none;
+    stroke: #3b9ff3;
+    stroke-width: 3;
+}
+
+.timeline-area {
+    fill: rgba(59,159,243,0.25);
+}
+
+.timeline-point {
+    fill: #3b9ff3;
+    stroke: white;
+    stroke-width: 2;
+}

@@ -29,19 +29,13 @@ class DetectionService:
         )
 
         confidence = float(
-            prediction_result.get(
-                "confidence",
-                0.0
-            )
-        )
+    prediction_result.get(
+        "confidence",
+        prediction_result.get("threat_score", 0.0)
+    )
+)
 
-        threat_score = float(
-            prediction_result.get(
-                "threat_score",
-                confidence
-            )
-        )
-
+        threat_score = confidence
         # =====================================================
         # 2. SIMULATOR ATTACK OVERRIDE
         # =====================================================
@@ -69,12 +63,12 @@ class DetectionService:
         # =====================================================
 
         try:
-
-            threat_result = self.threat_engine.analyze(
-                prediction=prediction,
-                threat_score=threat_score,
-                traffic=traffic
-            )
+         threat_result = self.threat_engine.analyze(
+           prediction=prediction,
+           threat_score=threat_score,
+          traffic=traffic,
+          confidence=confidence
+)
 
         except Exception as e:
 

@@ -1,857 +1,1165 @@
-const API = "http://127.0.0.1:8000";
+const API = "";
+
+let threatTimelineChart = null;
+let attackDistributionChart = null;
+
+let threatHistory = [];
+let normalTrafficCount = 0;
+
+const MAX_POINTS = 20;
 
 
-// ============================================================
-// DASHBOARD ELEMENTS
-// ============================================================
+// =====================================================
+// HELPER
+// =====================================================
 
-const totalPackets = document.getElementById("totalPackets");
-const totalThreats = document.getElementById("totalThreats");
-const totalIncidents = document.getElementById("totalIncidents");
-const currentAttack = document.getElementById("currentAttack");
-
-const threatProgress = document.getElementById("threatProgress");
-const threatLevel = document.getElementById("threatLevel");
-
-const systemDot = document.getElementById("systemDot");
-const systemStatus = document.getElementById("systemStatus");
-
-const eventsContainer = document.getElementById("events");
+function getElement(id) {
+    return document.getElementById(id);
+}
 
 
-// ============================================================
-// CHART DATA
-// ============================================================
+// =====================================================
+// API
+// =====================================================
 
-const trafficLabels = [];
-const trafficData = [];
-
-const threatLabels = [
-    "DDOS",
-    "PORT_SCAN",
-    "BOTNET",
-    "NORMAL"
-];
-
-const threatData = [
-    0,
-    0,
-    0,
-    0
-];
-
-
-// ============================================================
-// TRAFFIC CHART
-// ============================================================
-
-const trafficChart = new Chart(
-    document.getElementById("trafficChart"),
-    {
-        type: "line",
-
-        data: {
-            labels: trafficLabels,
-
-            datasets: [
-                {
-                    label: "Packets",
-
-                    data: trafficData,
-
-                    borderWidth: 2,
-
-                    tension: 0.3,
-
-                    fill: false
-                }
-            ]
-        },
-
-        options: {
-            responsive: true,
-
-            animation: false,
-
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    }
-);
-
-
-// ============================================================
-// THREAT DISTRIBUTION CHART
-// ============================================================
-
-const threatChart = new Chart(
-    document.getElementById("threatChart"),
-    {
-        type: "doughnut",
-
-        data: {
-            labels: threatLabels,
-
-            datasets: [
-                {
-                    data: threatData,
-
-                    borderWidth: 1
-                }
-            ]
-        },
-
-        options: {
-            responsive: true,
-
-            animation: false
-        }
-    }
-);
-
-
-// ============================================================
-// FETCH SIMULATOR STATUS
-// ============================================================
-
-async function updateDashboard() {
+async function api(url, options = {}) {
 
     try {
 
-        const response = await fetch(
-            `${API}/simulator/status`
-        );
+        const response = await fetch(API + url, options);
 
         if (!response.ok) {
-
-            throw new Error(
-                `HTTP ${response.status}`
-            );
+            throw new Error("HTTP " + response.status);
         }
 
-        const data = await response.json();
-
-        updateStatistics(data);
-
-        updateThreatLevel(data);
-
-        updateTrafficChart(data);
-
-        updateThreatChart(data);
-
-        updateLiveEvent(data);
+        return await response.json();
 
     } catch (error) {
 
-        console.error(
-            "Dashboard API error:",
-            error
-        );
+        console.error("API ERROR:", error);
 
-        systemStatus.textContent =
-            "SYSTEM OFFLINE";
-
-        systemDot.style.background =
-            "red";
+        return null;
     }
 }
 
 
-// ============================================================
-// UPDATE STATISTICS
-// ============================================================
+// =====================================================
+// SYSTEM STATUS
+// =====================================================
 
-function updateStatistics(data) {
+async function updateSystemStatus() {
 
-    totalPackets.textContent =
-        formatNumber(data.total_packets);
+    const data = await api("/simulator/status");
 
-    totalThreats.textContent =
-        formatNumber(data.total_threats);
+    const status = getElement("systemStatus");
 
-    totalIncidents.textContent =
-        formatNumber(data.total_incidents);
+    if (!status) {
+        return;
+    }
 
-    currentAttack.textContent =
-        data.current_attack || "NONE";
+    if (data) {
 
-
-    // Simulator status
-
-    if (data.running) {
-
-        systemStatus.textContent =
-            "SYSTEM ONLINE";
-
-        systemDot.style.background =
-            "green";
+        status.textContent =
+            data.running
+                ? "BACKEND ONLINE"
+                : "SYSTEM READY";
 
     } else {
 
-        systemStatus.textContent =
-            "SIMULATOR STOPPED";
-
-        systemDot.style.background =
-            "orange";
+        status.textContent =
+            "BACKEND OFFLINE";
     }
 }
 
 
-// ============================================================
-// UPDATE THREAT LEVEL
-// ============================================================
+// =====================================================
+// SIMULATOR DATA
+// =====================================================
 
-function updateThreatLevel(data) {
+async function updateSimulator() {
 
-    const score =
-        Number(data.threat_score || 0);
+    const data =
+        await api("/simulator/status");
+
+    if (!data) {
+        return;
+    }
 
 
-    // Keep score between 0 and 100
+    // -------------------------------------------------
+    // MAIN STATISTICS
+    // -------------------------------------------------
 
-    const safeScore =
+    const totalPackets =
+        getElement("totalPackets");
+
+    if (totalPackets) {
+
+        totalPackets.textContent =
+            Number(
+                data.total_packets || 0
+            ).toLocaleString();
+    }
+
+
+    const totalThreats =
+        getElement("totalThreats");
+
+    if (totalThreats) {
+
+        totalThreats.textContent =
+            Number(
+                data.total_threats || 0
+            ).toLocaleString();
+    }
+
+
+    const totalIncidents =
+        getElement("totalIncidents");
+
+    if (totalIncidents) {
+
+        totalIncidents.textContent =
+            Number(
+                data.total_incidents || 0
+            ).toLocaleString();
+    }
+
+
+    const currentAttack =
+        getElement("currentAttack");
+
+    if (currentAttack) {
+
+        currentAttack.textContent =
+            data.current_attack || "NONE";
+    }
+
+
+    const controlAttackStatus =
+        getElement("controlAttackStatus");
+
+    if (controlAttackStatus) {
+
+        controlAttackStatus.textContent =
+            data.current_attack || "NONE";
+    }
+
+
+    // -------------------------------------------------
+    // LAST EVENT
+    // -------------------------------------------------
+
+    const event =
+        data.last_event || {};
+
+    const analysis =
+        data.last_analysis || {};
+
+    const threatScore =
+        Number(
+            analysis.threat_score || 0
+        );
+
+
+    // -------------------------------------------------
+    // NETWORK METRICS
+    // -------------------------------------------------
+
+    const latestPackets =
+        getElement("latestPackets");
+
+    if (latestPackets) {
+
+        latestPackets.textContent =
+            Number(
+                event.packet_count || 0
+            ).toLocaleString();
+    }
+
+
+    const latestBytes =
+        getElement("latestBytes");
+
+    if (latestBytes) {
+
+        latestBytes.textContent =
+            Number(
+                event.bytes || 0
+            ).toLocaleString();
+    }
+
+
+    const mlConfidence =
+        getElement("mlConfidence");
+
+    if (mlConfidence) {
+
+        mlConfidence.textContent =
+            Math.round(
+                Number(
+                    analysis.confidence || 0
+                ) * 100
+            ) + "%";
+    }
+
+
+    const riskScore =
+        getElement("riskScore");
+
+    if (riskScore) {
+
+        riskScore.textContent =
+            Math.round(threatScore);
+    }
+
+
+    // -------------------------------------------------
+    // DEFENSE PANEL
+    // -------------------------------------------------
+
+    const defenseAttack =
+        getElement("defenseAttack");
+
+    if (defenseAttack) {
+
+        defenseAttack.textContent =
+            analysis.prediction || "NONE";
+    }
+
+
+    const defenseThreatScore =
+        getElement("defenseThreatScore");
+
+    if (defenseThreatScore) {
+
+        defenseThreatScore.textContent =
+            Math.round(threatScore);
+    }
+
+
+    const threatAnalysis =
+        analysis.threat_analysis || {};
+
+    const defenseRecommended =
+        getElement("defenseRecommended");
+
+    if (defenseRecommended) {
+
+        defenseRecommended.textContent =
+            threatAnalysis.recommended_action ||
+            "MONITOR";
+    }
+
+
+    const response =
+        analysis.response || {};
+
+    const defenseResponse =
+        getElement("defenseResponse");
+
+    if (defenseResponse) {
+
+        defenseResponse.textContent =
+            response.action || "NONE";
+    }
+
+
+    const defenseMessage =
+        getElement("defenseMessage");
+
+    if (defenseMessage) {
+
+        if (analysis.is_attack) {
+
+            defenseMessage.textContent =
+                "Threat detected: " +
+                (analysis.prediction || "UNKNOWN") +
+                " | Automated defense response active.";
+
+        } else {
+
+            defenseMessage.textContent =
+                "System is monitoring simulated 6G network traffic.";
+        }
+    }
+
+
+    // -------------------------------------------------
+    // THREAT LEVEL
+    // -------------------------------------------------
+
+    updateThreatLevel(threatScore);
+
+
+    // -------------------------------------------------
+    // THREAT TIMELINE
+    // -------------------------------------------------
+
+    addThreatHistory(threatScore);
+
+
+    // -------------------------------------------------
+    // NORMAL TRAFFIC
+    // -------------------------------------------------
+
+    if (
+        String(
+            event.attack_type || ""
+        ).toUpperCase() === "NORMAL"
+    ) {
+
+        normalTrafficCount++;
+    }
+
+
+    const normalCount =
+        getElement("normalCount");
+
+    if (normalCount) {
+
+        normalCount.textContent =
+            normalTrafficCount;
+    }
+}
+
+
+// =====================================================
+// THREAT LEVEL
+// =====================================================
+
+function updateThreatLevel(score) {
+
+    score =
         Math.max(
             0,
             Math.min(
                 100,
-                score
+                Number(score) || 0
             )
         );
 
 
-    threatProgress.style.width =
-        `${safeScore}%`;
+    const progress =
+        getElement("threatProgress");
+
+    if (progress) {
+
+        progress.style.width =
+            score + "%";
+    }
 
 
-    if (safeScore >= 90) {
+    let level = "LOW";
+
+
+    if (score >= 75) {
+
+        level = "CRITICAL";
+
+    } else if (score >= 50) {
+
+        level = "HIGH";
+
+    } else if (score >= 25) {
+
+        level = "MEDIUM";
+    }
+
+
+    const threatLevel =
+        getElement("threatLevel");
+
+    if (threatLevel) {
 
         threatLevel.textContent =
-            "CRITICAL";
-
-    } else if (safeScore >= 70) {
-
-        threatLevel.textContent =
-            "HIGH";
-
-    } else if (safeScore >= 40) {
-
-        threatLevel.textContent =
-            "MEDIUM";
-
-    } else {
-
-        threatLevel.textContent =
-            "LOW";
+            level;
     }
 }
 
 
-// ============================================================
-// UPDATE TRAFFIC CHART
-// ============================================================
+// =====================================================
+// THREAT HISTORY
+// =====================================================
 
-function updateTrafficChart(data) {
+function addThreatHistory(score) {
 
-    if (!data.last_event) {
-        return;
-    }
+    threatHistory.push({
 
+        time:
+            new Date().toLocaleTimeString(),
 
-    const event =
-        data.last_event;
+        score:
+            Number(score) || 0
+    });
 
-
-    const time =
-        new Date(
-            event.timestamp
-        ).toLocaleTimeString();
-
-
-    trafficLabels.push(time);
-
-    trafficData.push(
-        event.packet_count
-    );
-
-
-    // Keep only latest 20 points
-
-    if (trafficLabels.length > 20) {
-
-        trafficLabels.shift();
-
-        trafficData.shift();
-    }
-
-
-    trafficChart.update();
-}
-
-
-// ============================================================
-// UPDATE THREAT DISTRIBUTION
-// ============================================================
-
-function updateThreatChart(data) {
-
-    if (!data.last_event) {
-        return;
-    }
-
-
-    const attack =
-        data.last_event.attack_type;
-
-
-    if (attack === "DDOS") {
-
-        threatData[0]++;
-
-    } else if (
-        attack === "PORT_SCAN"
-    ) {
-
-        threatData[1]++;
-
-    } else if (
-        attack === "BOTNET"
-    ) {
-
-        threatData[2]++;
-
-    } else {
-
-        threatData[3]++;
-    }
-
-
-    threatChart.update();
-}
-
-
-// ============================================================
-// LIVE SECURITY EVENT
-// ============================================================
-
-function updateLiveEvent(data) {
-
-    if (!data.last_analysis) {
-        return;
-    }
-
-
-    const analysis =
-        data.last_analysis;
-
-    const traffic =
-        data.last_event;
-
-
-    const event =
-        document.createElement("div");
-
-    event.className =
-        "event";
-
-
-    const prediction =
-        analysis.prediction ||
-        "UNKNOWN";
-
-
-    const score =
-        analysis.threat_score ||
-        0;
-
-
-    const action =
-        analysis.response?.action ||
-        "NONE";
-
-
-    const incident =
-        analysis.incident_id ||
-        "-";
-
-
-    event.innerHTML = `
-
-        <strong>
-            ${prediction}
-        </strong>
-
-        &nbsp; | &nbsp;
-
-        Threat Score:
-        ${score}
-
-        &nbsp; | &nbsp;
-
-        Defense:
-        ${action}
-
-        &nbsp; | &nbsp;
-
-        Incident:
-        ${incident}
-
-        <br>
-
-        Source:
-        ${traffic?.src_ip || "-"}
-
-        →
-
-        Destination:
-        ${traffic?.dst_ip || "-"}
-
-        &nbsp; | &nbsp;
-
-        Protocol:
-        ${traffic?.protocol || "-"}
-
-    `;
-
-
-    eventsContainer.prepend(
-        event
-    );
-
-
-    // Keep only latest 10 events
-
-    while (
-        eventsContainer.children.length > 10
-    ) {
-
-        eventsContainer.removeChild(
-            eventsContainer.lastChild
-        );
-    }
-}
-
-
-// ============================================================
-// FORMAT NUMBERS
-// ============================================================
-
-function formatNumber(value) {
 
     if (
-        value === undefined ||
-        value === null
+        threatHistory.length >
+        MAX_POINTS
     ) {
 
-        return "0";
+        threatHistory.shift();
     }
 
 
-    return Number(value)
-        .toLocaleString();
+    updateThreatTimelineChart();
 }
 
 
-// ============================================================
-// START DASHBOARD UPDATES
-// ============================================================
+// =====================================================
+// THREAT SCORE TIMELINE
+// =====================================================
 
-updateDashboard();
+function updateThreatTimelineChart() {
+
+    const container =
+        document.getElementById("threatTimelineChart");
+
+    if (!container) {
+        return;
+    }
+
+    if (!threatHistory.length) {
+        return;
+    }
+
+    const width = 900;
+    const height = 280;
+
+    const paddingLeft = 45;
+    const paddingRight = 20;
+    const paddingTop = 20;
+    const paddingBottom = 35;
+
+    const graphWidth =
+        width - paddingLeft - paddingRight;
+
+    const graphHeight =
+        height - paddingTop - paddingBottom;
 
 
-// Update every 2 seconds
+    const values = threatHistory.map(
+        item => Math.max(
+            0,
+            Math.min(
+                100,
+                Number(item.score) || 0
+            )
+        )
+    );
 
-setInterval(
-    updateDashboard,
-    2000
-);
-// ============================================================
-// SIMULATOR CONTROL FUNCTIONS
-// ============================================================
 
+    const points = values.map(
+        (value, index) => {
+
+            const x =
+                paddingLeft +
+                (
+                    index /
+                    Math.max(
+                        values.length - 1,
+                        1
+                    )
+                ) *
+                graphWidth;
+
+            const y =
+                paddingTop +
+                graphHeight -
+                (
+                    value / 100
+                ) *
+                graphHeight;
+
+            return {
+                x,
+                y,
+                value
+            };
+        }
+    );
+
+
+    let linePath = "";
+
+    points.forEach(
+        (point, index) => {
+
+            linePath +=
+                index === 0
+                    ? `M ${point.x} ${point.y}`
+                    : ` L ${point.x} ${point.y}`;
+        }
+    );
+
+
+    const areaPath =
+        linePath +
+        ` L ${points[points.length - 1].x} ${
+            paddingTop + graphHeight
+        }` +
+        ` L ${points[0].x} ${
+            paddingTop + graphHeight
+        } Z`;
+
+
+    let grid = "";
+
+
+    for (
+        let value = 0;
+        value <= 100;
+        value += 20
+    ) {
+
+        const y =
+            paddingTop +
+            graphHeight -
+            (value / 100) *
+            graphHeight;
+
+
+        grid += `
+            <line
+                class="timeline-grid"
+                x1="${paddingLeft}"
+                y1="${y}"
+                x2="${width - paddingRight}"
+                y2="${y}"
+            />
+
+            <text
+                x="5"
+                y="${y + 5}"
+                fill="#8f9bb3"
+                font-size="12"
+            >
+                ${value}
+            </text>
+        `;
+    }
+
+
+    let circles = "";
+
+
+    points.forEach(
+        point => {
+
+            circles += `
+                <circle
+                    class="timeline-point"
+                    cx="${point.x}"
+                    cy="${point.y}"
+                    r="4"
+                >
+                    <title>
+                        Threat Score: ${point.value}
+                    </title>
+                </circle>
+            `;
+        }
+    );
+
+
+    container.innerHTML = `
+
+        <svg
+            viewBox="0 0 ${width} ${height}"
+            preserveAspectRatio="none"
+        >
+
+            ${grid}
+
+            <path
+                class="timeline-area"
+                d="${areaPath}"
+            />
+
+            <path
+                class="timeline-line"
+                d="${linePath}"
+            />
+
+            ${circles}
+
+            <text
+                x="${width / 2}"
+                y="${height - 5}"
+                text-anchor="middle"
+                fill="#8f9bb3"
+                font-size="12"
+            >
+                Real-Time Threat Score
+            </text>
+
+        </svg>
+    `;
+}
+// =====================================================
+// INCIDENTS
+// =====================================================
+
+async function updateIncidents() {
+
+    const data =
+        await api("/incidents/");
+
+
+    if (!data) {
+        return;
+    }
+
+
+    const incidents =
+        Array.isArray(data)
+            ? data
+            : (
+                data.incidents || []
+            );
+
+
+    updateAttackCounters(
+        incidents
+    );
+
+
+    updateIncidentTable(
+        incidents
+    );
+
+
+    updateAttackDistribution(
+        incidents
+    );
+}
+
+
+// =====================================================
+// ATTACK COUNTERS
+// =====================================================
+
+function updateAttackCounters(
+    incidents
+) {
+
+    let ddos = 0;
+    let portScan = 0;
+    let botnet = 0;
+
+
+    incidents.forEach(
+        incident => {
+
+            const type =
+                String(
+                    incident.attack_type ||
+                    incident.prediction ||
+                    ""
+                ).toUpperCase();
+
+
+            if (type === "DDOS") {
+
+                ddos++;
+
+            } else if (
+                type === "PORT_SCAN" ||
+                type === "PORT SCAN"
+            ) {
+
+                portScan++;
+
+            } else if (
+                type === "BOTNET"
+            ) {
+
+                botnet++;
+            }
+        }
+    );
+
+
+    const ddosCount =
+        getElement("ddosCount");
+
+    if (ddosCount) {
+
+        ddosCount.textContent =
+            ddos;
+    }
+
+
+    const portScanCount =
+        getElement("portScanCount");
+
+    if (portScanCount) {
+
+        portScanCount.textContent =
+            portScan;
+    }
+
+
+    const botnetCount =
+        getElement("botnetCount");
+
+    if (botnetCount) {
+
+        botnetCount.textContent =
+            botnet;
+    }
+}
+
+
+// =====================================================
+// ATTACK DISTRIBUTION
+// =====================================================
+
+function updateAttackDistribution(
+    incidents
+) {
+
+    const canvas =
+        getElement(
+            "attackDistributionChart"
+        );
+
+
+    if (!canvas) {
+        return;
+    }
+
+
+    if (
+        typeof Chart === "undefined"
+    ) {
+        return;
+    }
+
+
+    let ddos = 0;
+    let portScan = 0;
+    let botnet = 0;
+    let normal = 0;
+
+
+    incidents.forEach(
+        incident => {
+
+            const type =
+                String(
+                    incident.attack_type ||
+                    incident.prediction ||
+                    ""
+                ).toUpperCase();
+
+
+            if (type === "DDOS") {
+
+                ddos++;
+
+            } else if (
+                type === "PORT_SCAN" ||
+                type === "PORT SCAN"
+            ) {
+
+                portScan++;
+
+            } else if (
+                type === "BOTNET"
+            ) {
+
+                botnet++;
+
+            } else if (
+                type === "NORMAL"
+            ) {
+
+                normal++;
+            }
+        }
+    );
+
+
+    const values = [
+        ddos,
+        portScan,
+        botnet,
+        normal
+    ];
+
+
+    if (!attackDistributionChart) {
+
+        attackDistributionChart =
+            new Chart(
+                canvas,
+                {
+
+                    type:
+                        "doughnut",
+
+                    data: {
+
+                        labels: [
+
+                            "DDoS",
+
+                            "Port Scan",
+
+                            "Botnet",
+
+                            "Normal"
+                        ],
+
+                        datasets: [
+
+                            {
+                                data:
+                                    values
+                            }
+
+                        ]
+                    },
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false
+                    }
+                }
+            );
+
+    } else {
+
+        attackDistributionChart
+            .data
+            .datasets[0]
+            .data = values;
+
+
+        attackDistributionChart.update(
+            "none"
+        );
+    }
+}
+
+
+// =====================================================
+// INCIDENT TABLE
+// =====================================================
+
+function updateIncidentTable(
+    incidents
+) {
+
+    const body =
+        getElement(
+            "incidentTableBody"
+        );
+
+
+    if (!body) {
+        return;
+    }
+
+
+    if (
+        incidents.length === 0
+    ) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="10">
+                    No security incidents detected.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    body.innerHTML =
+        incidents
+            .slice(0, 20)
+            .map(
+                incident => `
+
+                <tr>
+
+                    <td>
+                        ${
+                            incident.incident_id ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.timestamp ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.source_ip ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.destination_ip ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.attack_type ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            Math.round(
+                                Number(
+                                    incident.confidence ||
+                                    0
+                                ) * 100
+                            )
+                        }%
+                    </td>
+
+                    <td>
+                        ${
+                            Math.round(
+                                Number(
+                                    incident.risk_score ||
+                                    0
+                                )
+                            )
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.severity ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.recommended_action ||
+                            "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            incident.status ||
+                            "-"
+                        }
+                    </td>
+
+                </tr>
+
+            `
+            )
+            .join("");
+}
+
+
+// =====================================================
+// SIMULATOR CONTROLS
+// =====================================================
 
 async function startSimulator() {
 
-    try {
+    await api(
+        "/simulator/start",
+        {
+            method: "POST"
+        }
+    );
 
-        const response = await fetch(
-            `${API}/simulator/start`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "Simulator started:",
-            data
-        );
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "Start simulator error:",
-            error
-        );
-
-        alert(
-            "Unable to start simulator"
-        );
-    }
+    await updateSimulator();
 }
 
 
 async function stopSimulator() {
 
-    try {
+    await api(
+        "/simulator/stop",
+        {
+            method: "POST"
+        }
+    );
 
-        const response = await fetch(
-            `${API}/simulator/stop`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "Simulator stopped:",
-            data
-        );
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "Stop simulator error:",
-            error
-        );
-
-        alert(
-            "Unable to stop simulator"
-        );
-    }
+    await updateSimulator();
 }
 
 
-async function changeAttack(
+async function setAttack(
     attackType
 ) {
 
-    try {
-
-        const response = await fetch(
-            `${API}/simulator/attack/${attackType}`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "Attack changed:",
-            data
-        );
-
-
-        if (data.success) {
-
-            document.getElementById(
-                "controlAttackStatus"
-            ).textContent =
-                attackType;
-
+    await api(
+        "/simulator/attack/" +
+        attackType,
+        {
+            method: "POST"
         }
+    );
+
+    await updateSimulator();
+}
 
 
-        updateDashboard();
+// =====================================================
+// BUTTONS
+// =====================================================
 
-    } catch (error) {
+function setupButtons() {
 
-        console.error(
-            "Attack change error:",
-            error
+    const startButton =
+        getElement(
+            "startSimulator"
         );
 
-        alert(
-            "Unable to change attack type"
+    if (startButton) {
+
+        startButton.addEventListener(
+            "click",
+            startSimulator
+        );
+    }
+
+
+    const stopButton =
+        getElement(
+            "stopSimulator"
+        );
+
+    if (stopButton) {
+
+        stopButton.addEventListener(
+            "click",
+            stopSimulator
+        );
+    }
+
+
+    const normalButton =
+        getElement(
+            "normalAttack"
+        );
+
+    if (normalButton) {
+
+        normalButton.addEventListener(
+            "click",
+            () => setAttack("NONE")
+        );
+    }
+
+
+    const ddosButton =
+        getElement(
+            "ddosAttack"
+        );
+
+    if (ddosButton) {
+
+        ddosButton.addEventListener(
+            "click",
+            () => setAttack("DDOS")
+        );
+    }
+
+
+    const portScanButton =
+        getElement(
+            "portScanAttack"
+        );
+
+    if (portScanButton) {
+
+        portScanButton.addEventListener(
+            "click",
+            () => setAttack("PORT_SCAN")
+        );
+    }
+
+
+    const botnetButton =
+        getElement(
+            "botnetAttack"
+        );
+
+    if (botnetButton) {
+
+        botnetButton.addEventListener(
+            "click",
+            () => setAttack("BOTNET")
         );
     }
 }
 
 
-// ============================================================
-// BUTTON EVENTS
-// ============================================================
+// =====================================================
+// START DASHBOARD
+// =====================================================
+
+async function initializeDashboard() {
+
+    console.log(
+        "6G AI Cyber Defense Dashboard loaded"
+    );
 
 
-document.getElementById(
-    "startSimulator"
-).addEventListener(
-    "click",
-    startSimulator
-);
+    setupButtons();
 
 
-document.getElementById(
-    "stopSimulator"
-).addEventListener(
-    "click",
-    stopSimulator
-);
+    await updateSystemStatus();
+
+    await updateSimulator();
+
+    await updateIncidents();
 
 
-document.getElementById(
-    "normalAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("NONE");
-
-    }
-);
+    setInterval(
+        updateSystemStatus,
+        3000
+    );
 
 
-document.getElementById(
-    "ddosAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("DDOS");
-
-    }
-);
+    setInterval(
+        updateSimulator,
+        1000
+    );
 
 
-document.getElementById(
-    "portScanAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("PORT_SCAN");
-
-    }
-);
-
-
-document.getElementById(
-    "botnetAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("BOTNET");
-
-    }
-);
-// ============================================================
-// 6G SIMULATOR CONTROL PANEL
-// ============================================================
-
-
-async function startSimulator() {
-
-    try {
-
-        const response = await fetch(
-            `${API}/simulator/start`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "START:",
-            data
-        );
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "Start simulator error:",
-            error
-        );
-
-        alert(
-            "Could not start simulator."
-        );
-    }
+    setInterval(
+        updateIncidents,
+        3000
+    );
 }
 
 
-// ============================================================
-// STOP SIMULATOR
-// ============================================================
+// =====================================================
+// PAGE LOAD
+// =====================================================
 
-async function stopSimulator() {
-
-    try {
-
-        const response = await fetch(
-            `${API}/simulator/stop`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "STOP:",
-            data
-        );
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "Stop simulator error:",
-            error
-        );
-
-        alert(
-            "Could not stop simulator."
-        );
-    }
-}
-
-
-// ============================================================
-// CHANGE ATTACK
-// ============================================================
-
-async function changeAttack(
-    attackType
-) {
-
-    try {
-
-        const response = await fetch(
-            `${API}/simulator/attack/${attackType}`,
-            {
-                method: "POST"
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(
-            "ATTACK:",
-            data
-        );
-
-
-        if (data.success) {
-
-            document.getElementById(
-                "controlAttackStatus"
-            ).textContent =
-                attackType === "NONE"
-                    ? "NORMAL"
-                    : attackType;
-        }
-
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "Attack change error:",
-            error
-        );
-
-        alert(
-            "Could not change attack."
-        );
-    }
-}
-
-
-// ============================================================
-// BUTTON EVENTS
-// ============================================================
-
-document.getElementById(
-    "startSimulator"
-).addEventListener(
-    "click",
-    startSimulator
-);
-
-
-document.getElementById(
-    "stopSimulator"
-).addEventListener(
-    "click",
-    stopSimulator
-);
-
-
-document.getElementById(
-    "normalAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("NONE");
-
-    }
-);
-
-
-document.getElementById(
-    "ddosAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("DDOS");
-
-    }
-);
-
-
-document.getElementById(
-    "portScanAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("PORT_SCAN");
-
-    }
-);
-
-
-document.getElementById(
-    "botnetAttack"
-).addEventListener(
-    "click",
-    function () {
-
-        changeAttack("BOTNET");
-
-    }
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeDashboard
 );

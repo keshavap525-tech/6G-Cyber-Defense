@@ -6,7 +6,7 @@
 
     <title>6G AI Cyber Defense Dashboard</title>
 
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="/dashboard/static/dashboard.css">
 </head>
 
 <body>
@@ -27,6 +27,242 @@
 
 
 <main class="dashboard">
+    <!-- =====================================================
+     ADVANCED ATTACK ANALYTICS
+     ===================================================== -->
+
+<section class="panel analytics-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Advanced Attack Analytics</h2>
+            <p>Real-time analysis of simulated 6G network threats</p>
+        </div>
+
+        <span class="live-indicator">
+            ● LIVE
+        </span>
+
+    </div>
+
+
+    <!-- ANALYTICS CARDS -->
+
+    <div class="analytics-cards">
+
+        <div class="analytics-card">
+
+            <span>DDOS ATTACKS</span>
+
+            <strong id="ddosCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="analytics-card">
+
+            <span>PORT SCANS</span>
+
+            <strong id="portScanCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="analytics-card">
+
+            <span>BOTNET ATTACKS</span>
+
+            <strong id="botnetCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="analytics-card">
+
+            <span>NORMAL TRAFFIC</span>
+
+            <strong id="normalCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHARTS -->
+
+    <div class="analytics-charts">
+
+        <div class="analytics-chart-box">
+
+            <h3>
+                Threat Score Timeline
+            </h3>
+
+            <div id="threatTimelineChart"></div>
+        </div>
+
+
+        <div class="analytics-chart-box">
+
+            <h3>
+                Attack Distribution
+            </h3>
+
+            <canvas id="attackDistributionChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- NETWORK METRICS -->
+
+    <div class="network-metrics">
+
+        <div class="metric-box">
+
+            <span>Latest Packets</span>
+
+            <strong id="latestPackets">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="metric-box">
+
+            <span>Latest Bytes</span>
+
+            <strong id="latestBytes">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="metric-box">
+
+            <span>ML Confidence</span>
+
+            <strong id="mlConfidence">
+                0%
+            </strong>
+
+        </div>
+
+
+        <div class="metric-box">
+
+            <span>Risk Score</span>
+
+            <strong id="riskScore">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+    <section class="panel incident-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Live Security Incidents</h2>
+            <p>Real-time AI detected security events</p>
+        </div>
+
+        <span class="live-indicator">
+            ● LIVE
+        </span>
+    </div>
+
+    <div class="incident-table-container">
+
+        <table class="incident-table">
+
+            <thead>
+                <tr>
+                    <th>Incident ID</th>
+                    <th>Time</th>
+                    <th>Source IP</th>
+                    <th>Destination IP</th>
+                    <th>Attack</th>
+                    <th>Confidence</th>
+                    <th>Risk</th>
+                    <th>Severity</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="incidentTableBody">
+
+                <tr>
+                    <td colspan="10">
+                        Loading incidents...
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+<section class="panel defense-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Automated Defense Response</h2>
+            <p>AI-powered response to detected threats</p>
+        </div>
+
+        <span id="defenseStatus" class="defense-status">
+            MONITORING
+        </span>
+    </div>
+
+    <div class="defense-grid">
+
+        <div class="defense-card">
+            <span>Detected Attack</span>
+            <strong id="defenseAttack">NONE</strong>
+        </div>
+
+        <div class="defense-card">
+            <span>Threat Score</span>
+            <strong id="defenseThreatScore">0</strong>
+        </div>
+
+        <div class="defense-card">
+            <span>Recommended Action</span>
+            <strong id="defenseRecommended">MONITOR</strong>
+        </div>
+
+        <div class="defense-card">
+            <span>Response Action</span>
+            <strong id="defenseResponse">NONE</strong>
+        </div>
+
+    </div>
+
+    <div class="defense-message" id="defenseMessage">
+        System is monitoring simulated 6G network traffic.
+    </div>
+
+</section>
     <!-- ========================================================= -->
 <!-- SIMULATOR CONTROL PANEL -->
 <!-- ========================================================= -->
@@ -126,26 +362,7 @@
 
     <!-- CHARTS -->
 
-    <section class="charts">
 
-        <div class="panel">
-
-            <h2>Network Traffic</h2>
-
-            <canvas id="trafficChart"></canvas>
-
-        </div>
-
-
-        <div class="panel">
-
-            <h2>Threat Distribution</h2>
-
-            <canvas id="threatChart"></canvas>
-
-        </div>
-
-    </section>
 
 
     <!-- THREAT LEVEL -->
@@ -193,10 +410,8 @@
 
 </main>
 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script src="dashboard.js"></script>
+<script src="/dashboard/static/dashboard.js"></script>
 
 </body>
-</html>
+</html> give me new fresh code instead of edit
